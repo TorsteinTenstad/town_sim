@@ -8,42 +8,16 @@ use opengl_graphics::{GlGraphics, OpenGL};
 use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
+
 mod person;
-use person::*;
 mod entity;
-use entity::*;
-use entity::ShapeType;
 mod bounding_box;
+mod town;
+
+use person::*;
+use entity::*;
+use town::*;
 use bounding_box::*;
-
-pub struct Town {
-    people: Vec<Person>,
-    buildings: Vec<Entity>,
-}
-
-impl Town {
-    pub fn new() -> Town {
-        let mut town = Town {
-            people: Vec::<Person>::new(),
-            buildings: Vec::<Entity>::new(),
-        };
-        let mut building = Entity{
-            bounding_box: BoundingBox{
-                x_pos: 50,
-                y_pos: 50,
-                x_size: 200,
-                y_size: 200,
-            },
-            color: [0.5, 0.5, 0.5, 1.0],
-            shape_type: ShapeType::Rectangle
-        };
-        let mut person = Person::new();
-        person.wander_space = Some(building.bounding_box);
-        town.people.push(person);
-        town.buildings.push(building);
-        town
-    }
-}
 
 pub struct App {
     town: Town,

@@ -1,4 +1,3 @@
-use std::ptr;
 extern crate rand;
 use rand::Rng;
 use crate::bounding_box::*;
