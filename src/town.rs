@@ -15,10 +15,8 @@ impl Town {
         };
         let mut building = Entity{
             bounding_box: BoundingBox{
-                x_pos: 50,
-                y_pos: 50,
-                x_size: 200,
-                y_size: 200,
+                pos: [50, 50],
+                size: [200, 200],
             },
             color: [0.5, 0.5, 0.5, 1.0],
             shape_type: ShapeType::Rectangle

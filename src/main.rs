@@ -41,12 +41,12 @@ impl App {
             clear([0.0, 0.0, 0.0, 1.0], gl);
         });
         for building in &self.town.buildings{
-            let square = rectangle::square(0.0, 0.0, building.bounding_box.x_size as f64);
+            let square = rectangle::square(0.0, 0.0, building.bounding_box.size[0] as f64);
             self.gl.draw(args.viewport(), |c, gl| {
                 let transform = c
                     .transform
                     //.trans(x, y)
-                    .trans(building.bounding_box.x_pos as f64, building.bounding_box.y_pos as f64);
+                    .trans(building.bounding_box.pos[0] as f64, building.bounding_box.pos[1] as f64);
                     //.rot_rad(entity.rotation);
                 match building.shape_type {
                     ShapeType::Rectangle => rectangle(building.color, square, transform, gl),
@@ -56,12 +56,12 @@ impl App {
             });
         }
         for person in &self.town.people{
-            let square = rectangle::square(0.0, 0.0, person.entity.bounding_box.x_size as f64);
+            let square = rectangle::square(0.0, 0.0, person.entity.bounding_box.size[0] as f64);
             self.gl.draw(args.viewport(), |c, gl| {
                 let transform = c
                     .transform
                     //.trans(x, y)
-                    .trans(person.entity.bounding_box.x_pos as f64, person.entity.bounding_box.y_pos as f64);
+                    .trans(person.entity.bounding_box.pos[0] as f64, person.entity.bounding_box.pos[1] as f64);
                     //.rot_rad(entity.rotation);
                 match person.entity.shape_type {
                     ShapeType::Rectangle => rectangle(person.entity.color, square, transform, gl),
