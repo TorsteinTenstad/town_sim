@@ -13,30 +13,30 @@ impl Vec2D::<i32>{
 }
 
 
-impl Add<Vec2D::<i32>> for Vec2D::<i32>{
-    type Output = Vec2D::<i32>;
+impl<T:Add<Output = T>> Add<Vec2D::<T>> for Vec2D::<T>{
+    type Output = Self;
 
-    fn add(self, rhs: Vec2D::<i32>) -> Vec2D::<i32>{
-        Vec2D::<i32>{
+    fn add(self, rhs: Self) -> Self{
+        Self{
             x: self.x + rhs.x,
             y: self.y + rhs.y,
         }
     }
 }
 
-impl Sub<Vec2D::<i32>> for Vec2D::<i32>{
-    type Output = Vec2D::<i32>;
+impl<T:Sub<Output = T>> Sub<Vec2D::<T>> for Vec2D::<T>{
+    type Output = Self;
 
-    fn sub(self, rhs: Vec2D::<i32>) -> Vec2D::<i32>{
-        Vec2D::<i32>{
+    fn sub(self, rhs: Self) -> Self{
+        Self{
             x: self.x - rhs.x,
             y: self.y - rhs.y,
         }
     }
 }
 
-impl AddAssign<Vec2D::<i32>> for Vec2D::<i32>{
-    fn add_assign(&mut self, rhs: Vec2D::<i32>){
+impl<T:AddAssign> AddAssign<Vec2D::<T>> for Vec2D::<T>{
+    fn add_assign(&mut self, rhs: Self){
         self.x += rhs.x;
         self.y += rhs.y;
     }
@@ -46,7 +46,7 @@ impl Mul<f64> for Vec2D::<i32>{
     type Output = Vec2D::<i32>;
 
     fn mul(self, scalar: f64) -> Vec2D::<i32>{
-        Vec2D::<i32>{
+        Self{
             x: (scalar * self.x as f64) as i32,
             y: (scalar * self.y as f64) as i32,
         }
@@ -56,16 +56,16 @@ impl Mul<f64> for Vec2D::<i32>{
 impl Mul<Vec2D::<i32>> for f64{
     type Output = Vec2D::<i32>;
 
-    fn mul(self, scalar: Vec2D::<i32>) -> Vec2D::<i32>{
-        scalar*self
+    fn mul(self, vec: Vec2D::<i32>) -> Vec2D::<i32>{
+        vec*self
     }
 }
 
-impl Rem<Vec2D::<i32>> for Vec2D::<i32>{
-    type Output = Vec2D::<i32>;
+impl<T:Rem<Output = T>> Rem<Vec2D::<T>> for Vec2D::<T>{
+    type Output = Self;
 
-    fn rem(self, rhs: Vec2D::<i32>) -> Vec2D::<i32>{
-        Vec2D::<i32>{
+    fn rem(self, rhs: Self) -> Self{
+        Self{
             x: self.x % rhs.x,
             y: self.y % rhs.y,
         }

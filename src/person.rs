@@ -43,11 +43,11 @@ impl Person{
     fn step_towards_target(&mut self, dt: f64) -> bool{
         if let Some(target_pos) = self.target_pos{
             let diff = target_pos - self.entity.bounding_box.pos;
-            let distance = diff.magnitude();
-            if distance < self.speed*dt{
+            let magnitude = diff.magnitude();
+            if magnitude < self.speed*dt{
                 true
             } else{
-                self.entity.bounding_box.pos += (self.speed*dt/distance)*diff;
+                self.entity.bounding_box.pos += (self.speed*dt/magnitude) * diff;
                 false
             }
         } else{

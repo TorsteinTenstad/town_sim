@@ -9,19 +9,19 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 
-mod vec2D;
 mod bounding_box;
+mod building;
 mod entity;
 mod person;
-mod building;
 mod town;
+mod vec2D;
 
-use vec2D::*;
 use bounding_box::*;
+use building::*;
 use entity::*;
 use person::*;
-use building::*;
 use town::*;
+use vec2D::*;
 
 pub struct App {
     town: Town,
@@ -44,7 +44,32 @@ impl App {
             // Clear the screen.
             clear([0.0, 0.0, 0.0, 1.0], gl);
         });
-        for building in &self.town.buildings{
+        for entity in self
+            .town
+            .buildings
+            .iter()
+            .map(|building| &building.entity)
+            .chain(self.town.people.iter().map(|person| &person.entity))
+        {
+            let square = rectangle::square(0.0, 0.0, entity.bounding_box.size.x as f64);
+            self.gl.draw(args.viewport(), |c, gl| {
+                let transform = c
+                    .transform
+                    //.trans(x, y)
+                    .trans(
+                        entity.bounding_box.pos.x as f64,
+                        entity.bounding_box.pos.y as f64,
+                    );
+                //.rot_rad(entity.rotation);
+                match entity.shape_type {
+                    ShapeType::Rectangle => rectangle(entity.color, square, transform, gl),
+                    ShapeType::Ellipse => ellipse(entity.color, square, transform, gl),
+                    ShapeType::Triangle => ellipse(entity.color, square, transform, gl),
+                }
+            });
+        }
+        /*
+        for building in &self.town.buildings {
             let square = rectangle::square(0.0, 0.0, building.entity.bounding_box.size.x as f64);
             self.gl.draw(args.viewport(), |c, gl| {
                 let transform = c
@@ -74,10 +99,11 @@ impl App {
                 }
             });
         }
+        */
     }
 
     fn update(&mut self, args: &UpdateArgs) {
-        for person in &mut self.town.people{
+        for person in &mut self.town.people {
             person.update(args.dt);
         }
     }
@@ -92,7 +118,6 @@ fn main() {
     //println!("b: {:?}", b);
     //println!("c: {:?}", c);
     //println!("b.mag: {:?}", b.magnitude());
-
 
     // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
