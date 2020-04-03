@@ -1,5 +1,7 @@
+use crate::vec2D::*;
+
 #[derive(Copy, Clone)]
 pub struct BoundingBox{
-    pub pos: [i32; 2],
-    pub size: [i32; 2],
+    pub pos: Vec2D::<i32>,
+    pub size: Vec2D::<i32>,
 }

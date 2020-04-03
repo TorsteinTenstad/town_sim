@@ -1,13 +1,14 @@
 extern crate rand;
 use rand::Rng;
-use crate::bounding_box::*;
 use crate::entity::*;
+use crate::bounding_box::*;
+use crate::vec2D::*;
 
 pub struct Person{
     pub entity: Entity,
     pub wander_space: Option<BoundingBox>,
     speed: f64,
-    target_pos: Option<[i32; 2]>,
+    target_pos: Option<Vec2D<i32>>,
 }
 
 impl Person{
@@ -15,8 +16,8 @@ impl Person{
         Person{
             entity: Entity {
                 bounding_box: BoundingBox{
-                    pos: [0, 0],
-                    size: [50, 50],
+                    pos: Vec2D::<i32>{x: 0, y: 0},
+                    size: Vec2D::<i32>{x: 50, y: 50},
                 },
                 //rotation: 0.5,
                 color: [0.125, 0.388, 0.608, 1.0],
@@ -24,33 +25,29 @@ impl Person{
             },
             speed: 200.0,
             wander_space: None,
-            target_pos: Some([50, 50]),
+            target_pos: None,
         }
     }
 
     pub fn update(&mut self, dt: f64){
-        self.step_wander(dt);
-    }
-
-    fn step_wander(&mut self, dt: f64){
         let reached_target = self.step_towards_target(dt);
-        if reached_target{
+        if reached_target || !self.target_pos.is_some(){
             if let Some(wander_space) = self.wander_space{
                 let mut rng = rand::thread_rng();
-                self.target_pos = Some([rng.gen::<i32>().abs() % (wander_space.size[0] - self.entity.bounding_box.size[0]) + wander_space.pos[0], rng.gen::<i32>().abs() % (wander_space.size[1] - self.entity.bounding_box.size[1]) + wander_space.pos[1]]);
+                self.target_pos = Some(Vec2D::<i32>{x: rng.gen::<i32>().abs() % (wander_space.size.x - self.entity.bounding_box.size.x) + wander_space.pos.x, y: rng.gen::<i32>().abs() % (wander_space.size.y - self.entity.bounding_box.size.y) + wander_space.pos.y});
             }
         }
     }
 
     fn step_towards_target(&mut self, dt: f64) -> bool{
         if let Some(target_pos) = self.target_pos{
-            let diff = [(target_pos[0] - self.entity.bounding_box.pos[0]) as f64, (target_pos[1] - self.entity.bounding_box.pos[1]) as f64];
-            let distance = (diff[0]*diff[0]+diff[1]*diff[1]).abs().sqrt();
+            let diff = Vec2D::<f64>{x: (target_pos.x - self.entity.bounding_box.pos.x) as f64, y: (target_pos.y - self.entity.bounding_box.pos.y) as f64};
+            let distance = (diff.x*diff.x+diff.y*diff.y).abs().sqrt();
             if distance < self.speed*dt{
                 true
             } else{
-                self.entity.bounding_box.pos[0] += (self.speed*dt*diff[0]/distance) as i32;
-                self.entity.bounding_box.pos[1] += (self.speed*dt*diff[1]/distance) as i32;
+                self.entity.bounding_box.pos.x += (self.speed*dt*diff.x/distance) as i32;
+                self.entity.bounding_box.pos.y += (self.speed*dt*diff.y/distance) as i32;
                 false
             }
         } else{

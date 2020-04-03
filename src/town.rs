@@ -1,6 +1,7 @@
 use crate::entity::*;
 use crate::person::*;
 use crate::bounding_box::*;
+use crate::vec2D::*;
 
 pub struct Town {
     pub people: Vec<Person>,
@@ -15,8 +16,8 @@ impl Town {
         };
         let mut building = Entity{
             bounding_box: BoundingBox{
-                pos: [50, 50],
-                size: [200, 200],
+                pos: Vec2D::<i32>{x: 50, y: 50},
+                size: Vec2D::<i32>{x: 200, y: 200},
             },
             color: [0.5, 0.5, 0.5, 1.0],
             shape_type: ShapeType::Rectangle
