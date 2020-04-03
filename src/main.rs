@@ -9,16 +9,17 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 
-mod person;
-mod entity;
-mod bounding_box;
-mod town;
 mod vec2D;
+mod bounding_box;
+mod entity;
+mod person;
+mod town;
 
-use person::*;
-use entity::*;
-use town::*;
+use vec2D::*;
 use bounding_box::*;
+use entity::*;
+use person::*;
+use town::*;
 
 pub struct App {
     town: Town,
@@ -81,6 +82,16 @@ impl App {
 }
 
 fn main() {
+    //let a = Vec2D::<f64>{x: 6.0, y: 4.0} as Vec2D::<i32>;
+    //let b = Vec2D::<f64>{x: 3.0, y: 4.0};
+    //let c = a - b;
+
+    //println!("a: {:?}", a);
+    //println!("b: {:?}", b);
+    //println!("c: {:?}", c);
+    //println!("b.mag: {:?}", b.magnitude());
+
+
     // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
 

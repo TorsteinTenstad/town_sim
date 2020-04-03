@@ -34,20 +34,20 @@ impl Person{
         if reached_target || !self.target_pos.is_some(){
             if let Some(wander_space) = self.wander_space{
                 let mut rng = rand::thread_rng();
-                self.target_pos = Some(Vec2D::<i32>{x: rng.gen::<i32>().abs() % (wander_space.size.x - self.entity.bounding_box.size.x) + wander_space.pos.x, y: rng.gen::<i32>().abs() % (wander_space.size.y - self.entity.bounding_box.size.y) + wander_space.pos.y});
+                let rand_vec = Vec2D::<i32>{x: rng.gen::<i32>().abs(), y: rng.gen::<i32>().abs(), };
+                self.target_pos = Some((rand_vec % (wander_space.size - self.entity.bounding_box.size)) + wander_space.pos);
             }
         }
     }
 
     fn step_towards_target(&mut self, dt: f64) -> bool{
         if let Some(target_pos) = self.target_pos{
-            let diff = Vec2D::<f64>{x: (target_pos.x - self.entity.bounding_box.pos.x) as f64, y: (target_pos.y - self.entity.bounding_box.pos.y) as f64};
-            let distance = (diff.x*diff.x+diff.y*diff.y).abs().sqrt();
+            let diff = target_pos - self.entity.bounding_box.pos;
+            let distance = diff.magnitude();
             if distance < self.speed*dt{
                 true
             } else{
-                self.entity.bounding_box.pos.x += (self.speed*dt*diff.x/distance) as i32;
-                self.entity.bounding_box.pos.y += (self.speed*dt*diff.y/distance) as i32;
+                self.entity.bounding_box.pos += (self.speed*dt/distance)*diff;
                 false
             }
         } else{
