@@ -13,12 +13,14 @@ mod vec2D;
 mod bounding_box;
 mod entity;
 mod person;
+mod building;
 mod town;
 
 use vec2D::*;
 use bounding_box::*;
 use entity::*;
 use person::*;
+use building::*;
 use town::*;
 
 pub struct App {
@@ -43,17 +45,17 @@ impl App {
             clear([0.0, 0.0, 0.0, 1.0], gl);
         });
         for building in &self.town.buildings{
-            let square = rectangle::square(0.0, 0.0, building.bounding_box.size.x as f64);
+            let square = rectangle::square(0.0, 0.0, building.entity.bounding_box.size.x as f64);
             self.gl.draw(args.viewport(), |c, gl| {
                 let transform = c
                     .transform
                     //.trans(x, y)
-                    .trans(building.bounding_box.pos.x as f64, building.bounding_box.pos.y as f64);
+                    .trans(building.entity.bounding_box.pos.x as f64, building.entity.bounding_box.pos.y as f64);
                     //.rot_rad(entity.rotation);
-                match building.shape_type {
-                    ShapeType::Rectangle => rectangle(building.color, square, transform, gl),
-                    ShapeType::Ellipse => ellipse(building.color, square, transform, gl),
-                    ShapeType::Triangle => ellipse(building.color, square, transform, gl),
+                match building.entity.shape_type {
+                    ShapeType::Rectangle => rectangle(building.entity.color, square, transform, gl),
+                    ShapeType::Ellipse => ellipse(building.entity.color, square, transform, gl),
+                    ShapeType::Triangle => ellipse(building.entity.color, square, transform, gl),
                 }
             });
         }
