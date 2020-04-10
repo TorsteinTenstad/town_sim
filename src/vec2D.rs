@@ -1,6 +1,8 @@
 use std::ops::*;
+use std::f64::consts::PI;
+use std::f64::*;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Vec2D<T>{
     pub x: T,
     pub y: T,
@@ -9,6 +11,14 @@ pub struct Vec2D<T>{
 impl Vec2D::<i32>{
     pub fn magnitude(self) -> f64{
         ((self.x*self.x+self.y*self.y) as f64).abs().sqrt()
+    }
+    pub fn rotate(self, ang: f64) -> Self{
+        let ang_rad = PI*ang/180.0;
+        Self{x: (self.x as f64*ang_rad.cos() - self.y as f64*ang_rad.sin()) as i32,
+             y: (self.x as f64*ang_rad.sin() + self.y as f64*ang_rad.cos()) as i32}
+    }
+    pub fn ang(self) -> f64{
+        (self.y as f64).atan2(self.x as f64)
     }
 }
 

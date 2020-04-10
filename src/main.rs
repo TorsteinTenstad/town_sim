@@ -103,9 +103,7 @@ impl App {
     }
 
     fn update(&mut self, args: &UpdateArgs) {
-        for person in &mut self.town.people {
-            person.update(args.dt);
-        }
+        self.town.update(args.dt);
     }
 }
 
