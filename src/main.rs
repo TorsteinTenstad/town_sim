@@ -15,6 +15,7 @@ mod entity;
 mod person;
 mod town;
 mod vec2D;
+mod location_history;
 
 use bounding_box::*;
 use building::*;
@@ -51,14 +52,14 @@ impl App {
             .map(|building| &building.entity)
             .chain(self.town.people.iter().map(|person| &person.entity))
         {
-            let square = rectangle::square(0.0, 0.0, entity.bounding_box.size.x as f64);
+            let square = rectangle::square(0.0, 0.0, entity.bounding_box.size.x);
             self.gl.draw(args.viewport(), |c, gl| {
                 let transform = c
                     .transform
                     //.trans(x, y)
                     .trans(
-                        entity.bounding_box.pos.x as f64,
-                        entity.bounding_box.pos.y as f64,
+                        entity.bounding_box.pos.x,
+                        entity.bounding_box.pos.y,
                     );
                 //.rot_rad(entity.rotation);
                 match entity.shape_type {
@@ -121,9 +122,10 @@ fn main() {
     let opengl = OpenGL::V3_2;
 
     // Create an Glutin window.
-    let mut window: Window = WindowSettings::new("App", [500, 500])
+    let mut window: Window = WindowSettings::new("App", [1440, 1440])
         .graphics_api(opengl)
         .exit_on_esc(true)
+        .fullscreen(true)
         .build()
         .unwrap();
 
@@ -131,13 +133,17 @@ fn main() {
     let mut app = App::new(opengl);
 
     let mut events = Events::new(EventSettings::new());
+    let mut frame = 0;
     while let Some(e) = events.next(&mut window) {
+        frame += 1;
         if let Some(args) = e.render_args() {
             app.render(&args);
         }
 
         if let Some(args) = e.update_args() {
-            app.update(&args);
+            if frame > 300{
+                app.update(&args);
+            }
         }
     }
 }
