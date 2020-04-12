@@ -12,21 +12,18 @@ use piston::window::WindowSettings;
 mod bounding_box;
 mod building;
 mod entity;
+mod location_history;
 mod person;
 mod town;
 mod vec2D;
-mod location_history;
+mod config;
 
-use bounding_box::*;
-use building::*;
-use entity::*;
-use person::*;
-use town::*;
-use vec2D::*;
+use entity::ShapeType;
+use town::Town;
 
 pub struct App {
     town: Town,
-    gl: GlGraphics, // OpenGL drawing backend.
+    gl: GlGraphics,
 }
 
 impl App {
@@ -39,10 +36,8 @@ impl App {
 
     fn render(&mut self, args: &RenderArgs) {
         use graphics::*;
-        //let (x, y) = (args.window_size[0] / 2.0, args.window_size[1] / 2.0);
 
-        self.gl.draw(args.viewport(), |c, gl| {
-            // Clear the screen.
+        self.gl.draw(args.viewport(), |_c, gl| {
             clear([0.0, 0.0, 0.0, 1.0], gl);
         });
         for entity in self
@@ -56,12 +51,7 @@ impl App {
             self.gl.draw(args.viewport(), |c, gl| {
                 let transform = c
                     .transform
-                    //.trans(x, y)
-                    .trans(
-                        entity.bounding_box.pos.x,
-                        entity.bounding_box.pos.y,
-                    );
-                //.rot_rad(entity.rotation);
+                    .trans(entity.bounding_box.pos.x, entity.bounding_box.pos.y);
                 match entity.shape_type {
                     ShapeType::Rectangle => rectangle(entity.color, square, transform, gl),
                     ShapeType::Ellipse => ellipse(entity.color, square, transform, gl),
@@ -69,38 +59,6 @@ impl App {
                 }
             });
         }
-        /*
-        for building in &self.town.buildings {
-            let square = rectangle::square(0.0, 0.0, building.entity.bounding_box.size.x as f64);
-            self.gl.draw(args.viewport(), |c, gl| {
-                let transform = c
-                    .transform
-                    //.trans(x, y)
-                    .trans(building.entity.bounding_box.pos.x as f64, building.entity.bounding_box.pos.y as f64);
-                    //.rot_rad(entity.rotation);
-                match building.entity.shape_type {
-                    ShapeType::Rectangle => rectangle(building.entity.color, square, transform, gl),
-                    ShapeType::Ellipse => ellipse(building.entity.color, square, transform, gl),
-                    ShapeType::Triangle => ellipse(building.entity.color, square, transform, gl),
-                }
-            });
-        }
-        for person in &self.town.people{
-            let square = rectangle::square(0.0, 0.0, person.entity.bounding_box.size.x as f64);
-            self.gl.draw(args.viewport(), |c, gl| {
-                let transform = c
-                    .transform
-                    //.trans(x, y)
-                    .trans(person.entity.bounding_box.pos.x as f64, person.entity.bounding_box.pos.y as f64);
-                    //.rot_rad(entity.rotation);
-                match person.entity.shape_type {
-                    ShapeType::Rectangle => rectangle(person.entity.color, square, transform, gl),
-                    ShapeType::Ellipse => ellipse(person.entity.color, square, transform, gl),
-                    ShapeType::Triangle => ellipse(person.entity.color, square, transform, gl),
-                }
-            });
-        }
-        */
     }
 
     fn update(&mut self, args: &UpdateArgs) {
@@ -109,19 +67,8 @@ impl App {
 }
 
 fn main() {
-    //let a = Vec2D::<f64>{x: 6.0, y: 4.0} as Vec2D::<i32>;
-    //let b = Vec2D::<f64>{x: 3.0, y: 4.0};
-    //let c = a - b;
-
-    //println!("a: {:?}", a);
-    //println!("b: {:?}", b);
-    //println!("c: {:?}", c);
-    //println!("b.mag: {:?}", b.magnitude());
-
-    // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
 
-    // Create an Glutin window.
     let mut window: Window = WindowSettings::new("App", [1440, 1440])
         .graphics_api(opengl)
         .exit_on_esc(true)
@@ -129,7 +76,6 @@ fn main() {
         .build()
         .unwrap();
 
-    // Create a new game and run it.
     let mut app = App::new(opengl);
 
     let mut events = Events::new(EventSettings::new());
@@ -141,7 +87,7 @@ fn main() {
         }
 
         if let Some(args) = e.update_args() {
-            if frame > 2000{
+            if frame > 800 {
                 app.update(&args);
             }
         }

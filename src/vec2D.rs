@@ -1,7 +1,5 @@
 use std::f64::consts::PI;
-use std::f64::*;
-use std::ops::*;
-use std::iter::Sum;
+use std::ops::{Add, AddAssign, Mul, Rem, Sub};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Vec2D<T> {
@@ -17,7 +15,7 @@ impl<T> Vec2D<T> {
 
 impl Vec2D<f64> {
     pub fn magnitude(self) -> f64 {
-        ((self.x * self.x + self.y * self.y)).abs().sqrt()
+        (self.x * self.x + self.y * self.y).abs().sqrt()
     }
     pub fn rotate(self, ang: f64) -> Self {
         let ang_rad = PI * ang / 180.0;
@@ -60,10 +58,10 @@ impl<T: AddAssign> AddAssign<Vec2D<T>> for Vec2D<T> {
     }
 }
 
-impl<T:Mul<Output = T>+Clone> Mul<T> for Vec2D<T> {
+impl<T: Mul<Output = T> + Clone> Mul<T> for Vec2D<T> {
     type Output = Self;
 
-    fn mul(self, scalar: T) -> Self{
+    fn mul(self, scalar: T) -> Self {
         Self {
             x: scalar.clone() * self.x,
             y: scalar.clone() * self.y,
@@ -104,4 +102,3 @@ impl<'a, T:Add<Output = T>+Default> Sum<&'a T> for Vec2D<T> {
         })
     }
 }*/
-

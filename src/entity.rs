@@ -1,4 +1,4 @@
-use crate::bounding_box::*;
+use crate::bounding_box::BoundingBox;
 
 pub enum ShapeType {
     Ellipse,
@@ -11,4 +11,14 @@ pub struct Entity {
     //pub rotation: f64,
     pub color: [f32; 4],
     pub shape_type: ShapeType,
+}
+
+impl Entity {
+    pub fn new(bounding_box: BoundingBox, color: [f32; 4], shape_type: ShapeType) -> Entity {
+        Entity {
+            bounding_box,
+            color,
+            shape_type,
+        }
+    }
 }

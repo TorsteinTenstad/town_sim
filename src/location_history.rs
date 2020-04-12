@@ -1,4 +1,4 @@
-use crate::vec2D::*;
+use crate::vec2D::Vec2D;
 
 pub struct LocationHistory {
     timespan: usize,

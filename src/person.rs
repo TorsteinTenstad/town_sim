@@ -1,7 +1,8 @@
-use crate::bounding_box::*;
-use crate::entity::*;
-use crate::vec2D::*;
-use crate::location_history::*;
+use crate::bounding_box::BoundingBox;
+use crate::entity::ShapeType;
+use crate::entity::Entity;
+use crate::vec2D::Vec2D;
+use crate::location_history::LocationHistory;
 extern crate rand;
 use rand::Rng;
 
@@ -54,26 +55,30 @@ impl Person {
         &mut self,
         dt: f64,
         location_of_closest_other: Option<Vec2D<f64>>,
-        distancing_vector: Vec2D<f64>,
+        force: Vec2D<f64>,
         delta_risk: f64,
     ) {
         self.update_health(dt, delta_risk);
-        let mut delta_pos = distancing_vector * dt * self.speed;
-        let reached_target = self.step_towards_target(dt, location_of_closest_other, &mut delta_pos);
+        let mut delta_pos = force * dt * self.speed;
+        let reached_target = self.get_step_towards_target(dt, location_of_closest_other, &mut delta_pos);
         if reached_target || !self.target_pos.is_some() {
-            if let Some(wander_space) = self.wander_space {
-                let mut rng = rand::thread_rng();
-                let rand_vec = Vec2D::<f64> {
-                    x: rng.gen::<i64>().abs() as f64,
-                    y: rng.gen::<i64>().abs() as f64,
-                };
-                self.target_pos = Some(
-                    (rand_vec % (wander_space.size - self.entity.bounding_box.size))
-                        + wander_space.pos,
-                );
-            }
+            self.generate_new_target_pos_in_wander_space();
         }
         self.entity.bounding_box.pos = self.location_history.update(delta_pos);
+    }
+
+    fn generate_new_target_pos_in_wander_space(&mut self){
+        if let Some(wander_space) = self.wander_space {
+            let mut rng = rand::thread_rng();
+            let rand_vec = Vec2D::<f64> {
+                x: rng.gen::<i64>().abs() as f64,
+                y: rng.gen::<i64>().abs() as f64,
+            };
+            self.target_pos = Some(
+                (rand_vec % (wander_space.size - self.entity.bounding_box.size))
+                    + wander_space.pos,
+            );
+        }
     }
 
     fn update_health(&mut self, dt: f64, delta_risk: f64){
@@ -94,7 +99,7 @@ impl Person {
         }
     }
 
-    fn step_towards_target(
+    fn get_step_towards_target(
         &mut self,
         dt: f64,
         location_of_closest_other: Option<Vec2D<f64>>,
