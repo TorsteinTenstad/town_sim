@@ -141,7 +141,7 @@ fn main() {
         }
 
         if let Some(args) = e.update_args() {
-            if frame > 300{
+            if frame > 2000{
                 app.update(&args);
             }
         }

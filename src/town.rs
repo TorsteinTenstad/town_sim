@@ -21,7 +21,10 @@ impl Town {
             entity: Entity {
                 bounding_box: BoundingBox {
                     pos: Vec2D::<f64> { x: 50.0, y: 50.0 },
-                    size: Vec2D::<f64> { x: 1340.0 , y: 1340.0 },
+                    size: Vec2D::<f64> {
+                        x: 1340.0,
+                        y: 1340.0,
+                    },
                 },
                 color: [0.5, 0.5, 0.5, 1.0],
                 shape_type: ShapeType::Rectangle,
@@ -33,7 +36,7 @@ impl Town {
             let mut person = Person::new(Vec2D::<f64> {
                 x: rng.gen_range(720.0 - spread, 720.0 + spread),
                 y: rng.gen_range(720.0 - spread, 720.0 + spread),
-            });
+            }, i == 0);
             person.wander_space = Some(building.entity.bounding_box);
             town.people.push(person);
         }
@@ -55,13 +58,19 @@ impl Town {
             .iter()
             .map(|pos| self.get_distancing_vectors(&pos))
             .collect();
+        let delta_sick_risks: Vec<f64> = people_points
+            .iter()
+            .map(|pos| self.get_delta_sick_risk(&pos))
+            .collect();
 
-        for (person, (closest_point, distancing_vector)) in self
-            .people
-            .iter_mut()
-            .zip(closest_points.iter().zip(distancing_vectors.iter()))
+        for (person, (closest_point, (distancing_vector, delta_sick_risk))) in
+            self.people.iter_mut().zip(
+                closest_points
+                    .iter()
+                    .zip(distancing_vectors.iter().zip(delta_sick_risks.iter())),
+            )
         {
-            person.update(dt, *closest_point, *distancing_vector);
+            person.update(dt, *closest_point, *distancing_vector, *delta_sick_risk);
         }
     }
 
@@ -88,10 +97,26 @@ impl Town {
                 .collect(),
         );
         let magnitude = vec.magnitude();
-        if magnitude > 0.5{
-            vec = vec * (0.5/magnitude);
+        if magnitude > 0.5 {
+            vec = vec * (0.5 / magnitude);
         }
         vec
+    }
+
+    fn get_delta_sick_risk(&mut self, origin: &Vec2D<f64>) -> f64 {
+        let vec: Vec<f64> = self.people
+            .iter()
+            .map(|person| (person.get_latest_pos(), person.sick_risk))
+            .filter(|(pos, sick_risk)| pos != origin)
+            .map(|(pos, sick_risk)| ((*origin - pos).magnitude(), sick_risk))
+            .filter(|(r, sick_risk)| *r < 150.0)
+            .map(|(r, sick_risk)| sick_risk * (10000.0 / r.powi(2)))
+            .collect();
+        let mut sum = 0.0;
+        for x in vec{
+            sum += x;
+        }
+        sum
     }
 }
 

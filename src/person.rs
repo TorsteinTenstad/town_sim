@@ -12,10 +12,19 @@ pub struct Person {
     speed: f64,
     target_pos: Option<Vec2D<f64>>,
     personal_space_radius: f64,
+    sick: bool,
+    pub sick_risk: f64,
+    hygene: f64,
 }
 
 impl Person {
-    pub fn new(pos: Vec2D<f64>) -> Person {
+    pub fn new(pos: Vec2D<f64>, sick: bool) -> Person {
+        let mut color = [0.125, 0.388, 0.608, 1.0];
+        let mut sick_risk = 0.0;
+        if sick {
+            color = [1.0, 0.0, 0.0, 1.0];
+            sick_risk = 1.0;
+        }
         Person {
             entity: Entity {
                 bounding_box: BoundingBox {
@@ -23,14 +32,17 @@ impl Person {
                     size: Vec2D::<f64> { x: 50.0, y: 50.0 },
                 },
                 //rotation: 0.5,
-                color: [0.125, 0.388, 0.608, 1.0],
+                color,
                 shape_type: ShapeType::Ellipse,
             },
             wander_space: None,
             location_history: LocationHistory::new(pos, 8),
-            speed: 50.0,
+            speed: 100.0,
             target_pos: None,
-            personal_space_radius: 70.0,
+            personal_space_radius: 55.0,
+            sick,
+            sick_risk,
+            hygene: 0.2,
         }
     }
 
@@ -43,7 +55,9 @@ impl Person {
         dt: f64,
         location_of_closest_other: Option<Vec2D<f64>>,
         distancing_vector: Vec2D<f64>,
+        delta_risk: f64,
     ) {
+        self.update_health(dt, delta_risk);
         let mut delta_pos = distancing_vector * dt * self.speed;
         let reached_target = self.step_towards_target(dt, location_of_closest_other, &mut delta_pos);
         if reached_target || !self.target_pos.is_some() {
@@ -61,21 +75,25 @@ impl Person {
         }
         self.entity.bounding_box.pos = self.location_history.update(delta_pos);
     }
-    
-    fn step_towards_target2(&mut self, dt: f64, location_of_closest_other: Option<Vec2D<f64>>,) -> bool{
-        if let Some(target_pos) = self.target_pos{
-            let diff = target_pos - self.entity.bounding_box.pos;
-            let magnitude = diff.magnitude();
-            if magnitude < self.speed*dt{
-                true
+
+    fn update_health(&mut self, dt: f64, delta_risk: f64){
+        if !self.sick{
+            self.sick_risk += delta_risk * dt;
+            let mut rng = rand::thread_rng();
+            if rng.gen_range(0.0, 1.0) < self.sick_risk * dt{
+                self.sick = true;
+                self.sick_risk = 1.0;
+                self.entity.color = [1.0, 0.0, 0.0, 1.0];
             } else{
-                self.entity.bounding_box.pos += diff * (self.speed*dt/magnitude);
-                false
+                self.sick_risk -= self.hygene * dt;
+                if self.sick_risk < 0.0{
+                    self.sick_risk = 0.0;
+                }
+                self.entity.color = [self.sick_risk as f32, 0.388, 0.608, 1.0];
             }
-        } else{
-            false
         }
     }
+
     fn step_towards_target(
         &mut self,
         dt: f64,
