@@ -15,12 +15,11 @@ impl LocationHistory {
         }
     }
 
-    pub fn update(&mut self, delta: Vec2D<f64>) -> Vec2D<f64>{
+    pub fn update(&mut self, new_pos: Vec2D<f64>) -> Vec2D<f64>{
         if self.locations.len() < self.timespan {
-            self.locations.push(self.get_latest() + delta);
+            self.locations.push(new_pos);
             self.index += 1;
         } else {
-            let new_pos = self.get_latest() + delta;
             self.index += 1;
             self.index %= self.timespan;
             self.locations[self.index] = new_pos;

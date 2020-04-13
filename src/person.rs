@@ -76,7 +76,24 @@ impl Person {
             if reached_target || !self.target_pos.is_some() {
                 self.generate_new_target_pos_in_wander_space();
             }
-            self.entity.bounding_box.pos = self.location_history.update(delta_pos);
+            let mut new_pos = self.get_latest_pos() + delta_pos;
+            self.keep_pos_inside_wander_space(&mut new_pos);
+            self.entity.bounding_box.pos = self.location_history.update(new_pos);
+        }
+    }
+
+    fn keep_pos_inside_wander_space(&self, pos: &mut Vec2D<f64>){
+        if let Some(wander_space) = self.wander_space {
+            if pos.x < wander_space.pos.x {
+                pos.x = wander_space.pos.x;
+            } else if pos.x > wander_space.pos.x + wander_space.size.x - self.entity.bounding_box.size.x {
+                pos.x = wander_space.pos.x + wander_space.size.x - self.entity.bounding_box.size.x;
+            }
+            if pos.y < wander_space.pos.y {
+                pos.y = wander_space.pos.y;
+            } else if pos.y > wander_space.pos.y + wander_space.size.y - self.entity.bounding_box.size.y {
+                pos.y = wander_space.pos.y + wander_space.size.y - self.entity.bounding_box.size.y;
+            }
         }
     }
 
