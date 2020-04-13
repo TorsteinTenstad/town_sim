@@ -11,13 +11,13 @@ use piston::window::WindowSettings;
 
 mod bounding_box;
 mod building;
+mod config;
 mod entity;
 mod location_history;
+mod misc_functions;
 mod person;
 mod town;
 mod vec2D;
-mod config;
-mod misc_functions;
 
 use entity::ShapeType;
 use town::Town;
@@ -48,7 +48,13 @@ impl App {
             .map(|building| &building.entity)
             .chain(self.town.people.iter().map(|person| &person.entity))
         {
-            let square = rectangle::square(0.0, 0.0, entity.bounding_box.size.x);
+            let square = rectangle::rectangle_by_corners(
+                0.0,
+                0.0,
+                entity.bounding_box.size.x,
+                entity.bounding_box.size.y,
+            );
+            //let square = rectangle::square(0.0, 0.0, entity.bounding_box.size.x);
             self.gl.draw(args.viewport(), |c, gl| {
                 let transform = c
                     .transform
@@ -70,7 +76,7 @@ impl App {
 fn main() {
     let opengl = OpenGL::V3_2;
 
-    let mut window: Window = WindowSettings::new("App", [1440, 1440])
+    let mut window: Window = WindowSettings::new("App", [2560, 1440])
         .graphics_api(opengl)
         .exit_on_esc(true)
         .fullscreen(true)

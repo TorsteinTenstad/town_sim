@@ -31,18 +31,15 @@ impl Person {
         if sick {
             color = config::SICK_COLOR;
             sick_risk = 1.0;
-            remaining_sick_time = rand::thread_rng().gen_range(config::VIRUS_MIN_SICK_TIME, config::VIRUS_MAX_SICK_TIME);
+            remaining_sick_time = rand::thread_rng()
+                .gen_range(config::VIRUS_MIN_SICK_TIME, config::VIRUS_MAX_SICK_TIME);
         }
         Person {
-            entity: Entity {
-                bounding_box: BoundingBox {
-                    pos,
-                    size: Vec2D::<f64> { x: 50.0, y: 50.0 },
-                },
-                //rotation: 0.5,
+            entity: Entity::new(
+                BoundingBox::new(pos.x, pos.y, 50.0, 50.0),
                 color,
-                shape_type: ShapeType::Ellipse,
-            },
+                ShapeType::Ellipse,
+            ),
             wander_space: None,
             location_history: LocationHistory::new(pos, 8),
             speed: 100.0,
@@ -68,7 +65,7 @@ impl Person {
         force: Vec2D<f64>,
         delta_risk: f64,
     ) {
-        if !self.dead{
+        if !self.dead {
             self.update_health(dt, delta_risk);
             let mut delta_pos = force * dt * self.speed;
             let reached_target =
@@ -82,16 +79,20 @@ impl Person {
         }
     }
 
-    fn keep_pos_inside_wander_space(&self, pos: &mut Vec2D<f64>){
+    fn keep_pos_inside_wander_space(&self, pos: &mut Vec2D<f64>) {
         if let Some(wander_space) = self.wander_space {
             if pos.x < wander_space.pos.x {
                 pos.x = wander_space.pos.x;
-            } else if pos.x > wander_space.pos.x + wander_space.size.x - self.entity.bounding_box.size.x {
+            } else if pos.x
+                > wander_space.pos.x + wander_space.size.x - self.entity.bounding_box.size.x
+            {
                 pos.x = wander_space.pos.x + wander_space.size.x - self.entity.bounding_box.size.x;
             }
             if pos.y < wander_space.pos.y {
                 pos.y = wander_space.pos.y;
-            } else if pos.y > wander_space.pos.y + wander_space.size.y - self.entity.bounding_box.size.y {
+            } else if pos.y
+                > wander_space.pos.y + wander_space.size.y - self.entity.bounding_box.size.y
+            {
                 pos.y = wander_space.pos.y + wander_space.size.y - self.entity.bounding_box.size.y;
             }
         }
@@ -112,7 +113,7 @@ impl Person {
 
     fn update_health(&mut self, dt: f64, delta_risk: f64) {
         let mut rng = rand::thread_rng();
-        if !self.sick{
+        if !self.sick {
             self.sick_risk += delta_risk * dt;
             if self.sick_risk > 1.0 {
                 self.sick_risk = 1.0;
@@ -121,13 +122,14 @@ impl Person {
                 self.sick = true;
                 self.sick_risk = 1.0;
                 self.entity.color = config::SICK_COLOR;
-                self.remaining_sick_time = rng.gen_range(config::VIRUS_MIN_SICK_TIME, config::VIRUS_MAX_SICK_TIME);
+                self.remaining_sick_time =
+                    rng.gen_range(config::VIRUS_MIN_SICK_TIME, config::VIRUS_MAX_SICK_TIME);
             } else {
                 self.sick_risk -= self.hygene * dt;
                 if self.sick_risk < 0.0 {
                     self.sick_risk = 0.0;
                 }
-                if !self.immune{
+                if !self.immune {
                     self.entity.color = misc_functions::get_color_gradient(
                         config::DEFAULT_PERSON_COLOR,
                         config::MAX_RISK_COLOR,

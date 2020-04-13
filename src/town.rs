@@ -21,7 +21,7 @@ impl Town {
             buildings: Vec::new(),
         };
         let building = Building::new(Entity::new(
-            BoundingBox::new(50.0, 50.0, 1340.0, 1340.0),
+            BoundingBox::new(50.0, 50.0, 2460.0, 1340.0),
             config::DEFAULT_BUILDING_COLOR,
             ShapeType::Rectangle,
         ));
@@ -29,7 +29,7 @@ impl Town {
         for i in 0..50 {
             let mut person = Person::new(
                 Vec2D::<f64>::new(
-                    rng.gen_range(50.0, 1340.0),
+                    rng.gen_range(50.0, 2460.0),
                     rng.gen_range(50.0, 1340.0),
                 ),
                 i == 0,

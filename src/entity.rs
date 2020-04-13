@@ -8,7 +8,6 @@ pub enum ShapeType {
 
 pub struct Entity {
     pub bounding_box: BoundingBox,
-    //pub rotation: f64,
     pub color: [f32; 4],
     pub shape_type: ShapeType,
 }
