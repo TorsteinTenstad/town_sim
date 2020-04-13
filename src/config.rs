@@ -8,8 +8,8 @@ pub const VIRUS_RISK_STRENGTH: f64 = 100000.0;
 pub const MAX_VIRUS_RISK: f64 = 0.4;
 pub const VIRUS_RISK_POW: i32 = 3;
 
-pub const VIRUS_MIN_SICK_TIME: f64 = 5.0;
-pub const VIRUS_MAX_SICK_TIME: f64 = 14.0;
+pub const VIRUS_MIN_SICK_TIME: f64 = 24.0;
+pub const VIRUS_MAX_SICK_TIME: f64 = 48.0;
 pub const VIRUS_FATILITY: f64 = 0.1;
 
 pub const BACKGROUND_COLOR: [f32; 4] = [0.0, 0.0, 0.0, 1.0];

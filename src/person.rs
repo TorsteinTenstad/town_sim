@@ -5,6 +5,8 @@ use crate::entity::ShapeType;
 use crate::location_history::LocationHistory;
 use crate::misc_functions;
 use crate::vec2D::Vec2D;
+use crate::schedule_entry::ScheduleEntry;
+use crate::schedule::Schedule;
 extern crate rand;
 use rand::Rng;
 
@@ -13,7 +15,7 @@ pub struct Person {
     pub wander_space: Option<BoundingBox>,
     location_history: LocationHistory,
     speed: f64,
-    target_pos: Option<Vec2D<f64>>,
+    target_pos: Vec<Vec2D<f64>>,
     personal_space_radius: f64,
     sick: bool,
     remaining_sick_time: f64,
@@ -21,18 +23,24 @@ pub struct Person {
     hygene: f64,
     pub dead: bool,
     immune: bool,
+    pub schedule: Schedule,
 }
 
 impl Person {
     pub fn new(pos: Vec2D<f64>, sick: bool) -> Person {
+        let mut rng = rand::thread_rng();
         let mut color = config::DEFAULT_PERSON_COLOR;
         let mut sick_risk = 0.0;
         let mut remaining_sick_time = 0.0;
         if sick {
             color = config::SICK_COLOR;
             sick_risk = 1.0;
-            remaining_sick_time = rand::thread_rng()
-                .gen_range(config::VIRUS_MIN_SICK_TIME, config::VIRUS_MAX_SICK_TIME);
+            remaining_sick_time = rng.gen_range(config::VIRUS_MIN_SICK_TIME, config::VIRUS_MAX_SICK_TIME);
+        }
+        let mut schedule = Schedule::new();
+        for x in vec![0.0, 8.0, 16.0]{
+            let id: usize = rng.gen_range(0, 4);
+            schedule.push(ScheduleEntry::new(x, id));
         }
         Person {
             entity: Entity::new(
@@ -42,8 +50,8 @@ impl Person {
             ),
             wander_space: None,
             location_history: LocationHistory::new(pos, 8),
-            speed: 100.0,
-            target_pos: None,
+            speed: 500.0,
+            target_pos: Vec::new(),
             personal_space_radius: 55.0,
             sick,
             remaining_sick_time,
@@ -51,6 +59,7 @@ impl Person {
             hygene: 0.02,
             dead: false,
             immune: false,
+            schedule,
         }
     }
 
@@ -61,26 +70,26 @@ impl Person {
     pub fn update(
         &mut self,
         dt: f64,
+        time: f64,
         location_of_closest_other: Option<Vec2D<f64>>,
         force: Vec2D<f64>,
         delta_risk: f64,
     ) {
         if !self.dead {
             self.update_health(dt, delta_risk);
-            let mut delta_pos = force * dt * self.speed;
-            let reached_target =
-                self.get_step_towards_target(dt, location_of_closest_other, &mut delta_pos);
-            if reached_target || !self.target_pos.is_some() {
+            if self.target_pos.len() == 0 {
                 self.generate_new_target_pos_in_wander_space();
             }
-            let mut new_pos = self.get_latest_pos() + delta_pos;
-            self.keep_pos_inside_wander_space(&mut new_pos);
+            let mut new_pos = self.get_latest_pos()
+                + self.get_step_towards_target(dt, location_of_closest_other)
+                + force * dt * self.speed;
+            //self.keep_pos_inside_wander_space(&mut new_pos);
             self.entity.bounding_box.pos = self.location_history.update(new_pos);
         }
     }
 
     fn keep_pos_inside_wander_space(&self, pos: &mut Vec2D<f64>) {
-        if let Some(wander_space) = self.wander_space {
+        if let Some(wander_space) = self.wander_space{
             if pos.x < wander_space.pos.x {
                 pos.x = wander_space.pos.x;
             } else if pos.x
@@ -101,13 +110,16 @@ impl Person {
     fn generate_new_target_pos_in_wander_space(&mut self) {
         if let Some(wander_space) = self.wander_space {
             let mut rng = rand::thread_rng();
-            let rand_vec = Vec2D::<f64> {
-                x: rng.gen::<i64>().abs() as f64,
-                y: rng.gen::<i64>().abs() as f64,
-            };
-            self.target_pos = Some(
-                (rand_vec % (wander_space.size - self.entity.bounding_box.size)) + wander_space.pos,
-            );
+            self.target_pos.push(Vec2D::<f64>::new(
+                rng.gen_range(
+                    wander_space.pos.x,
+                    wander_space.pos.x + wander_space.size.x - self.entity.bounding_box.size.x,
+                ),
+                rng.gen_range(
+                    wander_space.pos.y,
+                    wander_space.pos.y + wander_space.size.y - self.entity.bounding_box.size.x,
+                ),
+            ));
         }
     }
 
@@ -156,33 +168,32 @@ impl Person {
         &mut self,
         dt: f64,
         location_of_closest_other: Option<Vec2D<f64>>,
-        delta_pos: &mut Vec2D<f64>,
-    ) -> bool {
+    ) -> Vec2D<f64> {
         let latest_pos = self.location_history.get_latest();
-        if let Some(target_pos) = self.target_pos {
-            let target_diff = target_pos - latest_pos;
+        if self.target_pos.len() != 0 {
+            let target_diff = self.target_pos[0] - latest_pos;
             let target_diff_magnitude = target_diff.magnitude();
             if target_diff_magnitude < self.speed * dt {
-                return true;
+                self.target_pos.remove(0);
+                return target_diff;
             } else {
                 if let Some(location_of_closest_other) = location_of_closest_other {
                     let closest_other_diff = location_of_closest_other - latest_pos;
                     let closest_other_diff_magnitude = closest_other_diff.magnitude();
                     if closest_other_diff_magnitude < self.personal_space_radius {
                         if target_diff_magnitude < self.personal_space_radius {
-                            return true;
+                            self.target_pos.remove(0);
+                            return Vec2D::<f64>::new(0.0, 0.0);
                         } else {
-                            *delta_pos += closest_other_diff.rotate(90.0)
+                            return closest_other_diff.rotate(90.0)
                                 * (self.speed * dt / closest_other_diff_magnitude);
-                            return false;
                         }
                     }
                 }
-                *delta_pos += target_diff * (self.speed * dt / target_diff_magnitude);
-                return false;
+                return target_diff * (self.speed * dt / target_diff_magnitude);
             }
         } else {
-            return false;
+            return Vec2D::<f64>::new(0.0, 0.0);
         }
     }
 }

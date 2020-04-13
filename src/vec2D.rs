@@ -1,5 +1,5 @@
 use std::f64::consts::PI;
-use std::ops::{Add, AddAssign, Mul, Rem, Sub};
+use std::ops::{Add, AddAssign, Mul, Rem, Sub, SubAssign};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Vec2D<T> {
@@ -55,6 +55,13 @@ impl<T: AddAssign> AddAssign<Vec2D<T>> for Vec2D<T> {
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
         self.y += rhs.y;
+    }
+}
+
+impl<T: SubAssign> SubAssign<Vec2D<T>> for Vec2D<T> {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
     }
 }
 

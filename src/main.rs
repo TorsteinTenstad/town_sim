@@ -18,6 +18,8 @@ mod misc_functions;
 mod person;
 mod town;
 mod vec2D;
+mod schedule_entry;
+mod schedule;
 
 use entity::ShapeType;
 use town::Town;
@@ -80,6 +82,7 @@ fn main() {
         .graphics_api(opengl)
         .exit_on_esc(true)
         .fullscreen(true)
+        .samples(4)
         .build()
         .unwrap();
 
