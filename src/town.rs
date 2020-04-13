@@ -5,6 +5,7 @@ use crate::entity::ShapeType;
 use crate::entity::Entity;
 use crate::person::Person;
 use crate::vec2D::Vec2D;
+use crate::misc_functions;
 extern crate rand;
 use rand::Rng;
 
@@ -21,16 +22,15 @@ impl Town {
         };
         let building = Building::new(Entity::new(
             BoundingBox::new(50.0, 50.0, 1340.0, 1340.0),
-            [0.5, 0.5, 0.5, 1.0],
+            config::DEFAULT_BUILDING_COLOR,
             ShapeType::Rectangle,
         ));
         let mut rng = rand::thread_rng();
-        let spread = 700.0;
         for i in 0..50 {
             let mut person = Person::new(
                 Vec2D::<f64>::new(
-                    rng.gen_range(720.0 - spread, 720.0 + spread),
-                    rng.gen_range(720.0 - spread, 720.0 + spread),
+                    rng.gen_range(50.0, 1340.0),
+                    rng.gen_range(50.0, 1340.0),
                 ),
                 i == 0,
             );
@@ -72,22 +72,24 @@ impl Town {
     fn get_closest_person(&mut self, origin: &Vec2D<f64>) -> Option<Vec2D<f64>> {
         self.people
             .iter()
+            .filter(|person| !person.dead)
             .map(|person| person.get_latest_pos())
             .filter(|pos| pos != origin)
             .min_by_key(|pos| (1000.0 * (*origin - *pos).magnitude()) as u64)
     }
 
     fn get_force(&mut self, origin: &Vec2D<f64>) -> Vec2D<f64> {
-        let mut vec = sum_vecs(
+        let mut vec = misc_functions::sum_vecs(
             self.people
                 .iter()
+                .filter(|person| !person.dead)
                 .map(|person| person.get_latest_pos())
                 .filter(|pos| pos != origin)
                 .map(|pos| (pos, (*origin - pos).magnitude()))
                 .filter(|(_pos, r)| *r < config::FORCE_REACH)
                 .map(|(pos, r)| {
                     let a = ((origin.y - pos.y) as f64).atan2((origin.x - pos.x) as f64);
-                    Vec2D::<f64>::new(a.cos(), a.sin()) * (config::FORCE_STRENGTH / r.powi(4))
+                    Vec2D::<f64>::new(a.cos(), a.sin()) * (config::FORCE_STRENGTH / r.powi(config::FORCE_POW))
                 })
                 .collect(),
         );
@@ -102,11 +104,12 @@ impl Town {
         let vec: Vec<f64> = self
             .people
             .iter()
+            .filter(|person| !person.dead)
             .map(|person| (person.get_latest_pos(), person.sick_risk))
             .filter(|(pos, _sick_risk)| pos != origin)
             .map(|(pos, sick_risk)| ((*origin - pos).magnitude(), sick_risk))
             .filter(|(r, _sick_risk)| *r < config::VIRUS_RISK_REACH)
-            .map(|(r, sick_risk)| sick_risk * (config::VIRUS_RISK_STRENGTH / r.powi(2)))
+            .map(|(r, sick_risk)| sick_risk * (config::VIRUS_RISK_STRENGTH / r.powi(config::VIRUS_RISK_POW)))
             .collect();
         let mut sum = 0.0;
         for x in vec {
@@ -116,12 +119,5 @@ impl Town {
             sum = config::MAX_VIRUS_RISK;
         }
         sum
-    }
-}
-
-pub fn sum_vecs(points: Vec<Vec2D<f64>>) -> Vec2D<f64> {
-    Vec2D::<f64> {
-        x: points.iter().map(|point| point.x).sum(),
-        y: points.iter().map(|point| point.y).sum(),
     }
 }

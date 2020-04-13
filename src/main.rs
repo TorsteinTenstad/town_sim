@@ -17,6 +17,7 @@ mod person;
 mod town;
 mod vec2D;
 mod config;
+mod misc_functions;
 
 use entity::ShapeType;
 use town::Town;
@@ -38,7 +39,7 @@ impl App {
         use graphics::*;
 
         self.gl.draw(args.viewport(), |_c, gl| {
-            clear([0.0, 0.0, 0.0, 1.0], gl);
+            clear(config::BACKGROUND_COLOR, gl);
         });
         for entity in self
             .town
